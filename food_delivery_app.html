@@ -1,0 +1,217 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Zomato Web App — Modular Design</title>
+  <style>
+    body{font-family:Inter,system-ui,Segoe UI,Arial;margin:24px;color:#0f172a;background:#f8fafc}
+    h1{font-size:28px;margin-bottom:6px}
+    h2{font-size:18px;margin-top:18px}
+    p{margin:6px 0}
+    .modules{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:12px;margin-top:8px}
+    .card{background:#fff;border:1px solid #e6edf3;padding:12px;border-radius:10px;box-shadow:0 4px 14px rgba(15,23,42,0.04)}
+    ul{margin:6px 0 0 18px}
+    code{background:#f3f7fb;padding:2px 6px;border-radius:6px;font-family:monospace}
+    .diagram{margin-top:18px;background:#0b1220;padding:18px;border-radius:12px}
+    .legend{font-size:13px;color:#94a3b8}
+    svg{width:100%;height:540px}
+    .note{margin-top:12px;font-size:14px}
+  </style>
+</head>
+<body>
+  <h1>Zomato Web Application — Modular Design</h1>
+  <p>This document provides a modular breakdown tailored to a Zomato-like web application: modules, interfaces, design rationale, and a UML component diagram rendered as SVG.</p>
+
+  <h2>Primary modules (low coupling, single responsibility)</h2>
+  <div class="modules">
+    <div class="card">
+      <h3>Auth & User Module</h3>
+      <ul>
+        <li>Registration/login (OAuth, email, phone), profile, saved addresses, KYC for partners</li>
+        <li>APIs: <code>AuthService</code>, <code>UserProfileService</code></li>
+        <li>Depends on: Notification, DB</li>
+      </ul>
+    </div>
+
+    <div class="card">
+      <h3>Restaurant Partner Module</h3>
+      <ul>
+        <li>Partner onboarding, menu management, order acceptance dashboard, operating hours</li>
+        <li>APIs: <code>PartnerPortalAPI</code>, <code>MenuMgmtService</code></li>
+        <li>Depends on: MediaStore, Billing</li>
+      </ul>
+    </div>
+
+    <div class="card">
+      <h3>Catalog, Menus & Collections</h3>
+      <ul>
+        <li>Restaurant discovery, collections (trending, offers), cuisines, photos</li>
+        <li>APIs: <code>CatalogAPI</code>, <code>CollectionsService</code></li>
+        <li>Depends on: Search, Cache</li>
+      </ul>
+    </div>
+
+    <div class="card">
+      <h3>Search & Personalization</h3>
+      <ul>
+        <li>Text/geo search, faceted filters, personalized recommendations (taste, past orders)</li>
+        <li>APIs: <code>SearchAPI</code>, <code>RecoService</code></li>
+        <li>Depends on: Analytics, Catalog</li>
+      </ul>
+    </div>
+
+    <div class="card">
+      <h3>Order & Cart Module</h3>
+      <ul>
+        <li>Cart, checkout, order lifecycle, invoice generation</li>
+        <li>APIs: <code>OrderService</code>, <code>CartService</code></li>
+        <li>Depends on: Payment, PartnerModule, Promo</li>
+      </ul>
+    </div>
+
+    <div class="card">
+      <h3>Payments & Wallet</h3>
+      <ul>
+        <li>Multiple gateway integrations, Zomato Wallet, refunds, settlements to partners</li>
+        <li>APIs: <code>PaymentGateway</code>, <code>WalletService</code></li>
+        <li>Depends on: Order, Accounting</li>
+      </ul>
+    </div>
+
+    <div class="card">
+      <h3>Delivery & Tracking</h3>
+      <ul>
+        <li>Assign riders, live tracking, ETA, route optimization, COD support</li>
+        <li>APIs: <code>DeliveryService</code>, <code>TrackingAPI</code></li>
+        <li>Depends on: Maps API, Event Bus</li>
+      </ul>
+    </div>
+
+    <div class="card">
+      <h3>Promotions & Offers (Zomato Pro)</h3>
+      <ul>
+        <li>Memberships, targeted offers, coupon engine, stacking rules</li>
+        <li>APIs: <code>PromoEngine</code>, <code>SubscriptionService</code></li>
+        <li>Depends on: Billing, Analytics, User</li>
+      </ul>
+    </div>
+
+    <div class="card">
+      <h3>Reviews, Ratings & Content</h3>
+      <ul>
+        <li>Reviews, photos, editorials, content moderation, collections</li>
+        <li>APIs: <code>ReviewService</code>, <code>ContentService</code></li>
+        <li>Depends on: User, PartnerModule, ML moderation</li>
+      </ul>
+    </div>
+
+    <div class="card">
+      <h3>Admin, Reporting & Settlements</h3>
+      <ul>
+        <li>Dashboards, partner settlements, fraud detection, audit logs</li>
+        <li>APIs: <code>AdminAPI</code>, <code>FinanceAPI</code></li>
+        <li>Depends on: Data Warehouse, Event Bus</li>
+      </ul>
+    </div>
+  </div>
+
+  <h2>Why modularity matters</h2>
+  <div class="card">
+    <ul>
+      <li><strong>Reusability:</strong> Services like <code>PaymentGateway</code> or <code>NotifyService</code> are reused across web, mobile, and partner integrations.</li>
+      <li><strong>Maintainability:</strong> Bug fixes and feature changes are isolated. E.g., change in wallet logic doesn't force redeploy of Search.</li>
+      <li><strong>Scalability:</strong> Traffic-heavy modules (Search, Catalog) can be independently scaled and optimized with caching and read replicas.</li>
+      <li><strong>Operational safety:</strong> Using event-driven interactions (Kafka) reduces blast radius for failures.</li>
+      <li><strong>Faster releases:</strong> Teams can own modules and deploy independently with API contracts and semantic versioning.</li>
+    </ul>
+  </div>
+
+  <h2>UML Component Diagram (Zomato web app)</h2>
+  <div class="diagram">
+    <svg viewBox="0 0 1200 640" xmlns="http://www.w3.org/2000/svg" aria-label="UML component diagram for Zomato web app">
+      <rect x="20" y="20" width="220" height="100" rx="10" fill="#081126" />
+      <text x="40" y="46" fill="#fff" font-size="14">Zomato Web Client</text>
+      <text x="40" y="66" fill="#94a3b8" font-size="12">(Browser)</text>
+
+      <rect x="260" y="60" width="200" height="64" rx="8" fill="#fff" stroke="#3b82f6" stroke-width="2" />
+      <text x="300" y="96" fill="#0b1220" font-weight="600">API Gateway</text>
+
+      <!-- Core modules -->
+      <rect x="500" y="20" width="220" height="100" rx="8" fill="#fff" stroke="#7c3aed" />
+      <text x="520" y="46" font-weight="700">Auth & User</text>
+      <text x="520" y="66" font-size="12" fill="#475569">AuthService, Profile</text>
+
+      <rect x="760" y="20" width="240" height="100" rx="8" fill="#fff" stroke="#10b981" />
+      <text x="780" y="46" font-weight="700">Partner Portal</text>
+      <text x="780" y="66" font-size="12" fill="#475569">MenuMgmt, Orders</text>
+
+      <rect x="500" y="140" width="220" height="100" rx="8" fill="#fff" stroke="#f97316" />
+      <text x="520" y="166" font-weight="700">Catalog & Collections</text>
+      <text x="520" y="186" font-size="12" fill="#475569">CatalogAPI, Media</text>
+
+      <rect x="760" y="140" width="240" height="100" rx="8" fill="#fff" stroke="#ef4444" />
+      <text x="780" y="166" font-weight="700">Order Module</text>
+      <text x="780" y="186" font-size="12" fill="#475569">OrderService, Cart</text>
+
+      <rect x="500" y="280" width="220" height="96" rx="8" fill="#fff" stroke="#06b6d4" />
+      <text x="520" y="304" font-weight="700">Payment & Wallet</text>
+      <text x="520" y="324" font-size="12" fill="#475569">Gateway, WalletService</text>
+
+      <rect x="760" y="280" width="240" height="96" rx="8" fill="#fff" stroke="#8b5cf6" />
+      <text x="780" y="304" font-weight="700">Delivery</text>
+      <text x="780" y="324" font-size="12" fill="#475569">RiderAssign, Tracking</text>
+
+      <rect x="260" y="360" width="220" height="92" rx="8" fill="#fff" stroke="#f59e0b" />
+      <text x="280" y="388" font-weight="700">Promotions & Subscriptions</text>
+      <text x="280" y="408" font-size="12" fill="#475569">PromoEngine, SubService</text>
+
+      <rect x="20" y="360" width="220" height="92" rx="8" fill="#fff" stroke="#64748b" />
+      <text x="40" y="388" font-weight="700">Notification</text>
+      <text x="40" y="408" font-size="12" fill="#475569">Push, Email, SMS</text>
+
+      <rect x="980" y="320" width="180" height="112" rx="8" fill="#fff" stroke="#0ea5a4" />
+      <text x="1000" y="352" font-weight="700">Admin & Analytics</text>
+      <text x="1000" y="372" font-size="12" fill="#475569">Reports, Settlements</text>
+
+      <rect x="500" y="420" width="220" height="80" rx="8" fill="#fff" stroke="#94a3b8" />
+      <text x="520" y="444" font-weight="700">Data Stores</text>
+      <text x="520" y="464" font-size="12" fill="#475569">RDBMS, NoSQL, ES, Warehouse</text>
+
+      <rect x="760" y="420" width="240" height="80" rx="8" fill="#fff" stroke="#94a3b8" />
+      <text x="780" y="444" font-weight="700">Event Bus / Cache</text>
+      <text x="780" y="464" font-size="12" fill="#475569">Kafka, Redis</text>
+
+      <defs>
+        <marker id="arrow2" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto">
+          <path d="M0,0 L10,5 L0,10 z" fill="#94a3b8" />
+        </marker>
+      </defs>
+
+      <!-- arrows -->
+      <line x1="240" y1="80" x2="260" y2="92" stroke="#94a3b8" stroke-width="2" marker-end="url(#arrow2)" />
+      <line x1="460" y1="92" x2="500" y2="70" stroke="#94a3b8" stroke-width="2" marker-end="url(#arrow2)" />
+      <line x1="460" y1="92" x2="760" y2="70" stroke="#94a3b8" stroke-width="2" marker-end="url(#arrow2)" />
+      <line x1="720" y1="190" x2="760" y2="190" stroke="#94a3b8" stroke-width="2" marker-end="url(#arrow2)" />
+      <line x1="720" y1="320" x2="760" y2="320" stroke="#94a3b8" stroke-width="2" marker-end="url(#arrow2)" />
+      <line x1="620" y1="376" x2="560" y2="460" stroke="#94a3b8" stroke-width="2" marker-end="url(#arrow2)" />
+      <line x1="880" y1="360" x2="880" y2="440" stroke="#94a3b8" stroke-width="2" marker-end="url(#arrow2)" />
+      <line x1="200" y1="420" x2="240" y2="410" stroke="#94a3b8" stroke-width="2" marker-end="url(#arrow2)" />
+
+      <text x="40" y="520" fill="#cbd5e1" font-size="12">Tip: Use API versioning and event-driven patterns (OrderPlaced → PaymentProcessed → RiderAssigned) to decouple flows.</text>
+    </svg>
+  </div>
+
+  <div class="note card">
+    <strong>Implementation tips for Zomato web:</strong>
+    <ul>
+      <li>Serve the web client via CDN, SSR for SEO (restaurant pages), and hydrate for interactivity.</li>
+      <li>Cache menu and collection pages aggressively; use ES for search and personalization indices.</li>
+      <li>Design partner settlements in the Finance service; keep transactional money flow auditable and separate from business logic.</li>
+      <li>Protect partner-facing endpoints with stricter auth and role-based access control.</li>
+    </ul>
+  </div>
+
+  <p class="legend">Created: Zomato web app modular component diagram and module responsibilities — ready for documentation or engineering handoff.</p>
+</body>
+</html>
